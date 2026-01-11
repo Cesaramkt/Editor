@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Agência Nova Inteligência - Studio AI</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Inter', 'system-ui', 'sans-serif'],
+            },
+            colors: {
+              // Mapping 'brand' to Sky-Teal Gradient
+              brand: {
+                50: '#f0f9ff',
+                100: '#e0f2fe',
+                400: '#38bdf8',
+                500: '#0EA5E9', // Sky 500 (Start of gradient)
+                600: '#2DD4BF', // Teal 400 (End of gradient)
+                700: '#0369a1',
+                900: '#0c4a6e',
+              },
+              // Mapping grays to Deep Dark Mode
+              gray: {
+                700: '#27272A', // Borders
+                800: '#121212', // Secondary Surfaces
+                900: '#0A0A0A', // Card Surface
+                950: '#020202', // App Background
+              }
+            },
+            boxShadow: {
+              'glow': '0 0 40px -10px rgba(14, 165, 233, 0.4)', // Sky blue glow
+              'card': '0 4px 6px -1px rgba(0, 0, 0, 0.5)',
+              'cta': '0 4px 14px 0 rgba(14, 165, 233, 0.39)' // Sky blue shadow
+            },
+            borderRadius: {
+              '3xl': '24px',
+            }
+          }
+        }
+      }
+    </script>
+    <style>
+      body {
+        background-color: #020202;
+        color: #ffffff;
+      }
+      /* Custom scrollbar */
+      ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+      }
+      ::-webkit-scrollbar-track {
+        background: #0A0A0A; 
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #27272A; 
+        border-radius: 4px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: #3F3F46; 
+      }
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "react/": "https://aistudiocdn.com/react@^19.2.0/",
+    "react": "https://aistudiocdn.com/react@^19.2.0",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.30.0",
+    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.554.0"
+  }
+}
+</script>
+</head>
+  <body class="antialiased">
+    <div id="root"></div>
+  </body>
+</html>

@@ -1,11 +1,11 @@
-
 import React, { useState, useEffect } from 'react';
-import { Key, Loader2, Sparkles, Layout, MonitorSmartphone, Clapperboard } from 'lucide-react';
+import { Key, Loader2, Sparkles, Layout, MonitorSmartphone, Clapperboard, Wand2 } from 'lucide-react';
 import InfiniteCanvas from './features/InfiniteCanvas';
 import EditModal from './features/EditModal';
 import BundleSelector from './features/BundleSelector';
 import LandingPageEditor from './features/LandingPageEditor';
-import VideoEditor from './features/VideoEditor'; // New Import
+import VideoEditor from './features/VideoEditor';
+import GeneratorPanel from './features/GeneratorPanel'; // New Import
 import { CanvasImage, CanvasZone, AspectRatio, BundleItem } from './types';
 import { checkApiKey, promptForApiKey, analyzeImage, outpaintImage } from './services/geminiService';
 import { createOutpaintingCanvas } from './utils/canvasUtils';
@@ -24,6 +24,9 @@ const App = () => {
   // Editing Flow State
   const [pendingEditId, setPendingEditId] = useState<string | null>(null); 
   const [isBundleSelectorOpen, setIsBundleSelectorOpen] = useState(false); 
+  
+  // Generator Panel State
+  const [isGeneratorOpen, setIsGeneratorOpen] = useState(false);
   
   const [isProcessingOutpaint, setIsProcessingOutpaint] = useState(false); 
   const [processingStatus, setProcessingStatus] = useState("");
@@ -76,6 +79,29 @@ const App = () => {
         img.src = src;
     };
     reader.readAsDataURL(file);
+  };
+
+  const handleGeneratedImageToAdd = (base64: string, w: number, h: number) => {
+      // Add to center of canvas view conceptually (0,0 is start, we add slightly offset)
+      const newImage: CanvasImage = {
+          id: Date.now().toString(),
+          src: base64,
+          x: 100, // Default X position
+          y: 100, // Default Y position
+          width: w,
+          height: h,
+          rotation: 0
+      };
+      
+      setImages(prev => [...prev, newImage]);
+      
+      // If we are not in canvas mode, switch to it to show the result
+      if (currentMode !== 'CANVAS') {
+          setCurrentMode('CANVAS');
+      }
+      
+      // Optional: Close panel after generation? 
+      // setIsGeneratorOpen(false); 
   };
 
   // --- Editing Flow Handlers ---
@@ -211,14 +237,13 @@ const App = () => {
     }
   };
 
-  // Callback for Labs Editor to save to main canvas
   const handleSaveFromLabs = (newSrc: string) => {
      const tempImg = new Image();
      tempImg.onload = () => {
          const newImage: CanvasImage = {
              id: Date.now().toString(),
              src: newSrc,
-             x: 100, // Default start position
+             x: 100, 
              y: 100,
              width: 400,
              height: 400 * (tempImg.height / tempImg.width),
@@ -230,7 +255,6 @@ const App = () => {
      tempImg.src = newSrc;
   };
 
-  // Loading / Key Check UI
   if (isCheckingKey) {
     return <div className="h-screen w-screen bg-gray-950 flex items-center justify-center text-white font-sans">
       <Loader2 className="animate-spin text-brand-500 w-8 h-8" />
@@ -298,7 +322,7 @@ const App = () => {
           </span>
         </div>
 
-        {/* Mode Switcher */}
+        {/* Center: Mode Switcher */}
         <div className="flex bg-[#121212] border border-[#27272A] rounded-full p-1">
              <button 
                 onClick={() => setCurrentMode('CANVAS')}
@@ -319,30 +343,59 @@ const App = () => {
                 <Clapperboard size={16} /> Video Lab
              </button>
         </div>
+
+        {/* Right: Actions */}
+        <div className="flex items-center gap-2">
+            <button 
+                onClick={() => setIsGeneratorOpen(!isGeneratorOpen)}
+                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold transition-all border
+                ${isGeneratorOpen 
+                    ? 'bg-brand-500 text-white border-brand-400 shadow-glow' 
+                    : 'bg-[#121212] border-[#27272A] text-gray-300 hover:border-brand-500 hover:text-white'}
+                `}
+            >
+                <Wand2 size={16} />
+                AI Generator
+            </button>
+        </div>
       </header>
 
       {/* Main Content Area */}
-      <div className="relative z-0 flex-1 w-full overflow-hidden">
-        {currentMode === 'CANVAS' && (
-            <InfiniteCanvas 
-                images={images}
-                setImages={setImages}
-                zones={zones}
-                setZones={setZones}
-                onEdit={handleEditDirectly}
-                onResize={handleResizeRequest}
-                onUpload={handleUpload}
+      <div className="relative z-0 flex-1 w-full overflow-hidden flex">
+        
+        {/* Workspace */}
+        <div className="flex-1 relative overflow-hidden">
+            {currentMode === 'CANVAS' && (
+                <InfiniteCanvas 
+                    images={images}
+                    setImages={setImages}
+                    zones={zones}
+                    setZones={setZones}
+                    onEdit={handleEditDirectly}
+                    onResize={handleResizeRequest}
+                    onUpload={handleUpload}
+                />
+            )}
+            {currentMode === 'LANDING' && (
+                <LandingPageEditor onSaveToCanvas={handleSaveFromLabs} />
+            )}
+            {currentMode === 'VIDEO' && (
+                <VideoEditor />
+            )}
+        </div>
+
+        {/* Right Side Panel: Generator */}
+        {isGeneratorOpen && (
+            <GeneratorPanel 
+                isOpen={isGeneratorOpen}
+                onClose={() => setIsGeneratorOpen(false)}
+                onImageGenerated={handleGeneratedImageToAdd}
             />
         )}
-        {currentMode === 'LANDING' && (
-            <LandingPageEditor onSaveToCanvas={handleSaveFromLabs} />
-        )}
-        {currentMode === 'VIDEO' && (
-            <VideoEditor />
-        )}
+
       </div>
 
-      {/* Modals & Overlays (Only relevant for Canvas Mode mostly, but kept accessible) */}
+      {/* Modals & Overlays */}
       <BundleSelector 
         isOpen={isBundleSelectorOpen}
         onClose={() => { setIsBundleSelectorOpen(false); setPendingEditId(null); }}
